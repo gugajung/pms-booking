@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <title>Laudo de Estabilidade de Talude</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 28px; color: #1d2733; }
+    h1, h2 { margin-bottom: 6px; }
+    p { margin: 4px 0; }
+    .meta { color: #536071; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .box { border: 1px solid #cfd8e3; border-radius: 8px; padding: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { text-align: left; border-bottom: 1px solid #dde3ec; padding: 8px; }
+    .ok { color: #12633b; font-weight: 700; }
+    .warn { color: #985c00; font-weight: 700; }
+    .bad { color: #9c2c2c; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <h1>Laudo de Estabilidade de Talude</h1>
+  <p class="meta">Gerado em {{ generated_at }} | Método: Bishop Simplificado (MVP)</p>
+
+  <div class="grid">
+    <div class="box">
+      <h2>Parâmetros do Modelo</h2>
+      <p><strong>Altura H:</strong> {{ context.height }} m</p>
+      <p><strong>Inclinação β:</strong> {{ context.beta_deg }}°</p>
+      <p><strong>Berma no topo:</strong> {{ context.crest_width }} m</p>
+      <p><strong>γ:</strong> {{ context.gamma }} kN/m³</p>
+      <p><strong>c':</strong> {{ context.cohesion }} kPa</p>
+      <p><strong>φ':</strong> {{ context.phi_deg }}°</p>
+      <p><strong>rᵤ:</strong> {{ context.ru }}</p>
+      <p><strong>Fatias:</strong> {{ context.n_slices }}</p>
+    </div>
+
+    <div class="box">
+      <h2>Superfície Crítica</h2>
+      <p><strong>Fator de Segurança (FS):</strong> {{ critical.fs }}</p>
+      <p><strong>Centro:</strong> ({{ critical.xc }}, {{ critical.yc }})</p>
+      <p><strong>Raio:</strong> {{ critical.radius }} m</p>
+      <p><strong>Interseção:</strong> x1={{ critical.x1 }}, x2={{ critical.x2 }}</p>
+      <p><strong>Classificação:</strong>
+        <span class="{% if stability == 'Estavel' %}ok{% elif stability == 'Atencao' %}warn{% else %}bad{% endif %}">
+          {{ stability }}
+        </span>
+      </p>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Critério</th>
+        <th>Referência</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>FS mínimo recomendado (operação permanente)</td>
+        <td>1.50</td>
+        <td>{% if critical.fs >= 1.5 %}Atende{% else %}Não atende{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Faixa de atenção</td>
+        <td>1.30 - 1.49</td>
+        <td>{% if critical.fs >= 1.3 and critical.fs < 1.5 %}Em atenção{% else %}-{% endif %}</td>
+      </tr>
+      <tr>
+        <td>Risco elevado</td>
+        <td>&lt; 1.30</td>
+        <td>{% if critical.fs < 1.3 %}Crítico{% else %}-{% endif %}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top: 24px; color: #586479;">Observação: este laudo é de um MVP para estudos preliminares, não substitui software certificado nem revisão técnica de engenharia geotécnica.</p>
+</body>
+</html>
